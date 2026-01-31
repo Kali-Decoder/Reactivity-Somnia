@@ -1,0 +1,21 @@
+{
+  "name": "hardhat-project",
+  "scripts": {
+    "deploy": "hardhat run scripts/deploy.ts --network somniaTestnet",
+    "create-subscription": "npx ts-node scripts/create-subscription.ts",
+    "manage-subscription": "npx ts-node scripts/manage-subscription.ts",
+    "test-chest": "CHEST_TYPE=${CHEST_TYPE:-COMMON} hardhat run scripts/test-chest.ts --network somniaTestnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "hardhat": "^2.28.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@somnia-chain/reactivity": "^0.1.9",
+    "@somnia-chain/reactivity-contracts": "^0.1.6",
+    "dotenv": "^17.2.3",
+    "viem": "^2.21.54"
+  }
+}

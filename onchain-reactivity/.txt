@@ -1,0 +1,52 @@
+[dotenv@17.2.3] injecting env (1) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+🔧 Initializing Somnia Reactivity SDK...
+👤 Account: 0xdAF0182De86F904918Db8d07c7340A1EfcDF8244
+💰 Balance: 7407.0785 STT
+🎮 MagicChestReactiveGame: 0x54eE35d85740CbB12B5cAB18A179ff6F5C7b28FF
+🔔 Event Signature: 0xb5d3a20278dcec496e4b0d565c9b0189c3900d13410e23b2b22ee83016a3fcf8
+⛽ Gas Price: 6000000000
+
+🚀 Creating subscription...
+{
+  handlerContractAddress: '0x54eE35d85740CbB12B5cAB18A179ff6F5C7b28FF',
+  emitter: '0x54eE35d85740CbB12B5cAB18A179ff6F5C7b28FF',
+  eventTopics: [
+    '0xb5d3a20278dcec496e4b0d565c9b0189c3900d13410e23b2b22ee83016a3fcf8'
+  ],
+  gasLimit: 500000n,
+  priorityFeePerGas: 600000000n,
+  maxFeePerGas: 12000000000n,
+  isGuaranteed: true,
+  isCoalesced: false
+}
+✅ Subscription TX: 0x4e1d7cb6c74e5347196a2c01bdd133452aec71e216a9345bfa32ae16f4bb6ddb
+🔍 Explorer: https://shannon-explorer.somnia.network/tx/0x4e1d7cb6c74e5347196a2c01bdd133452aec71e216a9345bfa32ae16f4bb6ddb
+✅ Confirmed in block: 294452991n
+
+📌 SUBSCRIPTION ID: 119
+
+📋 Subscription Info:
+[
+  {
+    "eventTopics": [
+      "0xb5d3a20278dcec496e4b0d565c9b0189c3900d13410e23b2b22ee83016a3fcf8",
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+    ],
+    "origin": "0x0000000000000000000000000000000000000000",
+    "caller": "0x0000000000000000000000000000000000000000",
+    "emitter": "0x54eE35d85740CbB12B5cAB18A179ff6F5C7b28FF",
+    "handlerContractAddress": "0x54eE35d85740CbB12B5cAB18A179ff6F5C7b28FF",
+    "handlerFunctionSelector": "0x53edf33d",
+    "priorityFeePerGas": "600000000",
+    "maxFeePerGas": "12000000000",
+    "gasLimit": "500000",
+    "isGuaranteed": true,
+    "isCoalesced": false
+  },
+  "0xdAF0182De86F904918Db8d07c7340A1EfcDF8244"
+]
+
+🎉 Subscription ACTIVE
+Now call openChest() and wait for a tx from 0x0100
