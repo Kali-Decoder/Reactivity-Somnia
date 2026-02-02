@@ -39,7 +39,7 @@ main()
 
   // Deployment Details:
   // -------------------
-  // Contract Address: 0x228994976d76580481Fae2ad06024C5fc7E18933
+  // Contract Address: 0xa4D7312A3e178C34079678f47070a6f5027A2Fdf
   // Network: somniaTestnet
   // Chain ID: 50312n
   // Deployer: 0xdAF0182De86F904918Db8d07c7340A1EfcDF8244

@@ -1,5 +1,5 @@
 // MagicChestReactiveGame Contract Configuration
-export const MAGIC_CHEST_ADDRESS = "0xD4E4A5C3c2a3F1dbA3d6C24ae2Bb4F962593e704"; // Update with your deployed address
+export const MAGIC_CHEST_ADDRESS = "0xa4D7312A3e178C34079678f47070a6f5027A2Fdf"; // Update with your deployed address
 
 export const MagicChestABI = [
   {

@@ -24,7 +24,7 @@ async function waitForNextBlock(provider: any, lastBlock: number) {
 }
 
 async function main() {
-  const contractAddress = "0x228994976d76580481Fae2ad06024C5fc7E18933";
+  const contractAddress = "0xa4D7312A3e178C34079678f47070a6f5027A2Fdf";
 
   console.log("🎮 Testing MagicChestReactiveGame");
   console.log("=".repeat(50));
@@ -104,7 +104,7 @@ async function main() {
   }
 
   // ---------------- WAIT FOR REACTIVITY ----------------
-  console.log("\n⏳ Waiting for reactivity (validator tx from 0x0100)…");
+  console.log("\n⏳ Waiting for reactivity (validator tx from 0x0000000000000000000000000000000000000100)…");
   console.log(`   Starting from block: ${receipt.blockNumber}`);
 
   let coinsAfter = coinsBefore;
@@ -125,7 +125,7 @@ async function main() {
       console.log(`   Block transactions count: ${block.transactions.length}`);
       
       const validatorTxs = block.transactions.filter((tx: any) => 
-        tx.from.toLowerCase() === "0x0100000000000000000000000000000000000000"
+        tx.from && tx.from.toLowerCase() === "0x0000000000000000000000000000000000000100"
       );
       
       if (validatorTxs.length > 0) {
@@ -182,7 +182,7 @@ async function main() {
   if (!reacted) {
     console.log("\n❌ NO REACTIVITY DETECTED");
     console.log("\n🔍 Possible Issues:");
-    console.log("1. Validator system is not running (0x0100 address not active)");
+    console.log("1. Validator system is not running (0x0000000000000000000000000000000000000100 address not active)");
     console.log("2. Subscription may not exist or be misconfigured");
     console.log("3. Subscription event topics don't match");
     console.log("4. Insufficient STT balance in subscription");
@@ -190,7 +190,7 @@ async function main() {
     console.log("\n💡 Debug Steps:");
     console.log("• Check validator activity: npm run check-validator");
     console.log("• Run diagnostics: npm run diagnose");
-    console.log("• Check explorer for tx from 0x0100");
+    console.log("• Check explorer for tx from 0x0000000000000000000000000000000000000100");
   } else {
     console.log("\n✅ REACTIVITY SUCCESS!");
   }

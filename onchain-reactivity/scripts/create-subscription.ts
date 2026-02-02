@@ -62,7 +62,7 @@ async function main() {
   // ---------------------------
   // Your deployed contract
   // ---------------------------
-  const CONTRACT = '0x228994976d76580481Fae2ad06024C5fc7E18933';
+  const CONTRACT = '0xa4D7312A3e178C34079678f47070a6f5027A2Fdf';
 
   console.log('🎮 MagicChestReactiveGame:', CONTRACT);
 
