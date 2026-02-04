@@ -26,7 +26,6 @@ const CHEST_TYPES = {
 
 // Contract address - UPDATE THIS with your deployed contract
 const CONTRACT_ADDRESS = "0xa4D7312A3e178C34079678f47070a6f5027A2Fdf";
-
 export default function GamePage() {
   // State management
   const [account, setAccount] = useState<string>("");
