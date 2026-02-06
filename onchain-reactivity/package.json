@@ -3,8 +3,10 @@
   "scripts": {
     "deploy": "hardhat run scripts/deploy.ts --network somniaTestnet",
     "create-subscription": "npx ts-node scripts/create-subscription.ts",
+    "create-test-subscription": "npx ts-node scripts/create-test-subscription.ts",
     "manage-subscription": "npx ts-node scripts/manage-subscription.ts",
-    "test-chest": "CHEST_TYPE=${CHEST_TYPE:-COMMON} hardhat run scripts/test-chest.ts --network somniaTestnet"
+    "test-handler": "npx ts-node scripts/test-handler.ts",
+    "verify-subscription": "npx ts-node scripts/verify-subscription.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",
