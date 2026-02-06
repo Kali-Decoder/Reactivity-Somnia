@@ -2,19 +2,21 @@
 
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { Gamepad2, RefreshCw, ExternalLink } from "lucide-react";
+import { Gamepad2, RefreshCw, ExternalLink, AlertTriangle, Network } from "lucide-react";
 import { ChestCard } from "../components/ChestCard";
 import { PlayerStats } from "../components/PlayerStats";
 import { ReactivityIndicator } from "../components/ReactivityIndicator";
+import { EventsHistory } from "../components/EventsHistory";
 import { WalletConnect } from "../components/WalletConnect";
-import { somniaTestnet } from "viem/chains";
+import { somniaTestnet } from "../config/chains";
 
 // Contract ABI
 const MAGIC_CHEST_ABI = [
   "function openChest(uint256 chestType) external",
   "function coins(address player) external view returns (uint256)",
   "function hasLegendarySword(address player) external view returns (bool)",
-  "event ChestOpened(address indexed player, uint256 chestType)"
+  "event ChestOpened(address indexed player, uint256 chestType)",
+  "event Reacted(address player, uint256 chestType)"
 ];
 
 // Chest types
@@ -37,20 +39,33 @@ export default function GamePage() {
   const [isProcessingReactivity, setIsProcessingReactivity] = useState(false);
   const [lastTxHash, setLastTxHash] = useState<string>("");
   const [lastUpdate, setLastUpdate] = useState<number | undefined>();
+  const [currentChainId, setCurrentChainId] = useState<number | null>(null);
+  const [isSwitchingNetwork, setIsSwitchingNetwork] = useState(false);
 
-  // Check wallet connection
+  // Check wallet connection and network
   useEffect(() => {
     checkConnection();
+    checkNetwork();
     if (typeof window !== "undefined" && (window as any).ethereum) {
       (window as any).ethereum.on("accountsChanged", handleAccountsChanged);
-      (window as any).ethereum.on("chainChanged", () => window.location.reload());
+      (window as any).ethereum.on("chainChanged", handleChainChanged);
     }
 
     return () => {
       if (typeof window !== "undefined" && (window as any).ethereum) {
         (window as any).ethereum.removeListener("accountsChanged", handleAccountsChanged);
+        (window as any).ethereum.removeListener("chainChanged", handleChainChanged);
       }
     };
+  }, []);
+
+  // Check network periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      checkNetwork();
+    }, 2000); // Check every 2 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
   // Fetch player stats when account changes
@@ -84,7 +99,82 @@ export default function GamePage() {
       setAccount("");
       setIsConnected(false);
     }
+    checkNetwork();
   };
+
+  const handleChainChanged = () => {
+    checkNetwork();
+    // Reload after a short delay to ensure state is updated
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  };
+
+  const checkNetwork = async () => {
+    if (typeof window !== "undefined" && (window as any).ethereum) {
+      try {
+        const chainId = await (window as any).ethereum.request({ method: "eth_chainId" });
+        const chainIdNumber = parseInt(chainId, 16);
+        setCurrentChainId(chainIdNumber);
+      } catch (error) {
+        console.error("Error checking network:", error);
+        setCurrentChainId(null);
+      }
+    } else {
+      setCurrentChainId(null);
+    }
+  };
+
+  const switchToSomniaTestnet = async () => {
+    if (typeof window === "undefined" || !(window as any).ethereum) {
+      alert("Please install MetaMask or another Web3 wallet!");
+      return;
+    }
+
+    try {
+      setIsSwitchingNetwork(true);
+      const chainIdHex = `0x${somniaTestnet.id.toString(16)}`;
+
+      try {
+        // Try to switch to Somnia Testnet
+        await (window as any).ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: chainIdHex }],
+        });
+      } catch (switchError: any) {
+        // If the network doesn't exist, add it
+        if (switchError.code === 4902) {
+          await (window as any).ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: chainIdHex,
+                chainName: somniaTestnet.name,
+                nativeCurrency: somniaTestnet.nativeCurrency,
+                rpcUrls: somniaTestnet.rpcUrls.default.http,
+                blockExplorerUrls: somniaTestnet.blockExplorers?.default
+                  ? [somniaTestnet.blockExplorers.default.url]
+                  : undefined,
+              },
+            ],
+          });
+        } else {
+          throw switchError;
+        }
+      }
+
+      // Wait a moment for the switch to complete
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      checkNetwork();
+    } catch (error: any) {
+      console.error("Error switching network:", error);
+      showNotification("error", error.message || "Failed to switch network");
+    } finally {
+      setIsSwitchingNetwork(false);
+    }
+  };
+
+  const isCorrectNetwork = currentChainId === somniaTestnet.id;
 
   const connectWallet = async () => {
     if (typeof window !== "undefined" && (window as any).ethereum) {
@@ -137,18 +227,53 @@ export default function GamePage() {
     try {
       setIsLoading(true);
       const provider = new ethers.BrowserProvider((window as any).ethereum);
+      
+      // Verify contract exists
+      const code = await provider.getCode(CONTRACT_ADDRESS);
+      if (code === "0x") {
+        console.error("Contract not found at address:", CONTRACT_ADDRESS);
+        showNotification("error", "Contract not found. Please check the contract address.");
+        return;
+      }
+      
       const contract = new ethers.Contract(CONTRACT_ADDRESS, MAGIC_CHEST_ABI, provider);
       
-      const [coinsBalance, hasSword] = await Promise.all([
-        contract.coins(account),
-        contract.hasLegendarySword(account),
-      ]);
+      // Use try-catch for each call to handle individual errors
+      let coinsBalance = 0;
+      let hasSword = false;
       
-      setCoins(Number(coinsBalance));
+      try {
+        const coinsResult = await contract.coins(account);
+        coinsBalance = coinsResult !== null && coinsResult !== undefined ? Number(coinsResult) : 0;
+      } catch (err: any) {
+        console.warn("Error fetching coins:", err);
+        // If it's a decoding error, the value is likely 0 (default mapping value)
+        if (err.code === "BAD_DATA" || err.message?.includes("decode")) {
+          coinsBalance = 0;
+        } else {
+          throw err;
+        }
+      }
+      
+      try {
+        const swordResult = await contract.hasLegendarySword(account);
+        hasSword = swordResult === true;
+      } catch (err: any) {
+        console.warn("Error fetching sword status:", err);
+        // If it's a decoding error, the value is likely false (default mapping value)
+        if (err.code === "BAD_DATA" || err.message?.includes("decode")) {
+          hasSword = false;
+        } else {
+          throw err;
+        }
+      }
+      
+      setCoins(coinsBalance);
       setHasLegendarySword(hasSword);
       setLastUpdate(Date.now());
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching player stats:", error);
+      showNotification("error", error.message || "Failed to fetch player stats");
     } finally {
       setIsLoading(false);
     }
@@ -160,6 +285,12 @@ export default function GamePage() {
       return;
     }
 
+    // Check if on correct network
+    if (!isCorrectNetwork) {
+      showNotification("error", "Please switch to Somnia Testnet to open chests!");
+      return;
+    }
+
     try {
       setIsOpening(chestType);
       
@@ -168,11 +299,26 @@ export default function GamePage() {
       const contract = new ethers.Contract(CONTRACT_ADDRESS, MAGIC_CHEST_ABI, signer);
 
       // Record state before opening
-      const coinsBefore = await contract.coins(account);
-      const hasSwordBefore = await contract.hasLegendarySword(account);
+      let coinsBefore = 0;
+      let hasSwordBefore = false;
+      
+      try {
+        const coinsResult = await contract.coins(account);
+        coinsBefore = coinsResult !== null && coinsResult !== undefined ? Number(coinsResult) : 0;
+      } catch (err: any) {
+        console.warn("Error fetching coins before:", err);
+        coinsBefore = 0;
+      }
+      
+      try {
+        hasSwordBefore = await contract.hasLegendarySword(account);
+      } catch (err: any) {
+        console.warn("Error fetching sword before:", err);
+        hasSwordBefore = false;
+      }
 
       console.log("📊 State BEFORE opening chest:");
-      console.log("  Coins:", Number(coinsBefore));
+      console.log("  Coins:", coinsBefore);
       console.log("  Has Sword:", hasSwordBefore);
 
       // Open the chest
@@ -192,18 +338,44 @@ export default function GamePage() {
       console.log("⏳ Waiting for on-chain reactivity...");
       await new Promise((resolve) => setTimeout(resolve, 10000));
 
-      // Fetch updated stats
-      const coinsAfter = await contract.coins(account);
-      const hasSwordAfter = await contract.hasLegendarySword(account);
+      // Fetch updated stats - retry a few times in case reactivity is still processing
+      let coinsAfter = coinsBefore;
+      let hasSwordAfter = hasSwordBefore;
+      let retries = 3;
+      
+      while (retries > 0) {
+        try {
+          const coinsResult = await contract.coins(account);
+          coinsAfter = coinsResult !== null && coinsResult !== undefined ? Number(coinsResult) : coinsBefore;
+          
+          const swordResult = await contract.hasLegendarySword(account);
+          hasSwordAfter = swordResult === true;
+          
+          // If we got valid results, break
+          break;
+        } catch (err: any) {
+          console.warn(`Error fetching stats after (${retries} retries left):`, err);
+          // If it's a decoding error, wait a bit and retry
+          if ((err.code === "BAD_DATA" || err.message?.includes("decode")) && retries > 1) {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            retries--;
+          } else {
+            // For other errors or last retry, use previous values
+            coinsAfter = coinsBefore;
+            hasSwordAfter = hasSwordBefore;
+            break;
+          }
+        }
+      }
 
       console.log("📊 State AFTER reactivity:");
-      console.log("  Coins:", Number(coinsAfter));
+      console.log("  Coins:", coinsAfter);
       console.log("  Has Sword:", hasSwordAfter);
       console.log("📈 Changes:");
-      console.log("  Coins gained:", Number(coinsAfter - coinsBefore));
+      console.log("  Coins gained:", coinsAfter - coinsBefore);
       console.log("  Sword obtained:", !hasSwordBefore && hasSwordAfter);
 
-      setCoins(Number(coinsAfter));
+      setCoins(coinsAfter);
       setHasLegendarySword(hasSwordAfter);
       setLastUpdate(Date.now());
       setIsProcessingReactivity(false);
@@ -242,6 +414,36 @@ export default function GamePage() {
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {/* Network Warning Banner */}
+        {isConnected && !isCorrectNetwork && (
+          <div className="mb-6 bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 backdrop-blur-sm">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-sm font-semibold text-yellow-500 mb-1">
+                    Wrong Network Detected
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    Please switch to Somnia Testnet (Chain ID: {somniaTestnet.id}) to use this application.
+                    {currentChainId && (
+                      <span className="ml-1">Current: Chain ID {currentChainId}</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={switchToSomniaTestnet}
+                disabled={isSwitchingNetwork}
+                className="flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-500/90 text-black rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Network className={`w-4 h-4 ${isSwitchingNetwork ? "animate-spin" : ""}`} />
+                {isSwitchingNetwork ? "Switching..." : "Switch to Somnia Testnet"}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
@@ -331,7 +533,7 @@ export default function GamePage() {
 
             {/* Chests Grid */}
             <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-monad-purple to-purple-400 bg-clip-text text-transparent">
+              <h2 className="text-2xl font-bold mb-4 text-white">
                 Choose Your Chest
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -357,6 +559,15 @@ export default function GamePage() {
                   disabled={!!isOpening}
                 />
               </div>
+            </div>
+
+            {/* Events History */}
+            <div className="mb-8">
+              <EventsHistory
+                contractAddress={CONTRACT_ADDRESS}
+                account={account}
+                abi={MAGIC_CHEST_ABI}
+              />
             </div>
 
             {/* Last Transaction */}
@@ -415,7 +626,7 @@ export default function GamePage() {
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-400">
-          <p className="mb-2">Made with 💜 and powered by Somnia On-Chain Reactivity</p>
+          <p className="mb-2">Made with love by Nikku.Dev 💜 and powered by Somnia On-Chain Reactivity</p>
           <div className="flex items-center justify-center gap-4">
             <a
               href="https://www.somnia.network/"

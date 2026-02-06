@@ -4,7 +4,6 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { ContractTemplate } from "@/app/config/contract_templates";
 import { Chain } from "viem";
 import { Trash2, Rocket, Loader2, CheckCircle, XCircle, ExternalLink, ZoomIn, ZoomOut, ArrowRightLeft, Plus } from "lucide-react";
-import { PushUI, usePushWalletContext } from "@pushchain/ui-kit";
 import { AddTemplateModal } from "./AddTemplateModal";
 import Link from "next/link";
 
@@ -35,11 +34,8 @@ export function Canvas({ onAddTemplate }: CanvasProps) {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const { connectionStatus } = usePushWalletContext();
-  const isConnected = connectionStatus === PushUI.CONSTANTS.CONNECTION.STATUS.CONNECTED;
   
-  // Deployment states (will be integrated with Push Chain later)
+  // Deployment states
   const [isDeploying, setIsDeploying] = useState(false);
   const [deployedAddress, setDeployedAddress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -202,8 +198,8 @@ export function Canvas({ onAddTemplate }: CanvasProps) {
   };
 
   const handleDeploy = async () => {
-    // Deployment with Push Chain - to be implemented
-    alert("Contract deployment will be integrated with Push Chain. For now, use the Universal Counter feature!");
+    // Deployment functionality - to be implemented
+    alert("Contract deployment functionality coming soon!");
   };
 
   const handleZoomIn = () => setScale((s) => Math.min(s + 0.1, 2));

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ContractTemplate } from "@/app/config/contract_templates";
 import { Chain } from "viem";
 import { FileCode, Network, ChevronDown, ChevronRight, CheckCircle, Search, X } from "lucide-react";
-import { PushUI, PushUniversalAccountButton, usePushWalletContext } from "@pushchain/ui-kit";
 
 interface SidebarProps {
   templates: ContractTemplate[];
@@ -16,9 +15,6 @@ export function Sidebar({ templates, chains }: SidebarProps) {
   const [chainsExpanded, setChainsExpanded] = useState(true);
   const [chainFilter, setChainFilter] = useState<"all" | "mainnet" | "testnet">("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const walletContext = usePushWalletContext();
-  const connectionStatus = walletContext?.connectionStatus;
-  const isConnected = connectionStatus === PushUI.CONSTANTS.CONNECTION.STATUS.CONNECTED;
 
   const handleTemplateDragStart = (e: React.DragEvent, template: ContractTemplate) => {
     e.dataTransfer.setData("template", JSON.stringify(template));
@@ -57,25 +53,6 @@ export function Sidebar({ templates, chains }: SidebarProps) {
           </div>
         </div>
         
-        {/* Wallet Connect Button */}
-        <div className="mb-4">
-          <PushUniversalAccountButton />
-        </div>
-        
-        {/* Current Network Indicator */}
-        {isConnected && (
-          <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-green-500 font-medium">Wallet Connected</p>
-                <p className="text-sm text-white font-semibold truncate">
-                  Push Chain Universal Wallet
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Scrollable Content */}
@@ -223,7 +200,7 @@ export function Sidebar({ templates, chains }: SidebarProps) {
                   </div>
                 ) : (
                   filteredChains.map((chain) => {
-                  const isCurrentChain = false; // Chain detection with Push Chain - to be implemented
+                  const isCurrentChain = false; // Chain detection - to be implemented
                   return (
                     <div
                       key={chain.id}

@@ -14,7 +14,7 @@ interface ChestCardProps {
 const chestConfig = {
   COMMON: {
     icon: Package,
-    color: "from-gray-600 to-gray-800",
+    bgColor: "bg-gray-700",
     borderColor: "border-gray-600/50",
     glowColor: "shadow-gray-600/20",
     emoji: "📦",
@@ -22,7 +22,7 @@ const chestConfig = {
   },
   RARE: {
     icon: Sparkles,
-    color: "from-blue-600 to-purple-600",
+    bgColor: "bg-blue-700",
     borderColor: "border-blue-500/50",
     glowColor: "shadow-blue-500/30",
     emoji: "✨",
@@ -30,7 +30,7 @@ const chestConfig = {
   },
   LEGENDARY: {
     icon: Crown,
-    color: "from-yellow-500 to-orange-600",
+    bgColor: "bg-yellow-600",
     borderColor: "border-yellow-500/50",
     glowColor: "shadow-yellow-500/40",
     emoji: "👑",
@@ -47,12 +47,12 @@ export function ChestCard({ type, reward, isOpening, onOpen, disabled }: ChestCa
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative group rounded-2xl border ${config.borderColor} bg-gradient-to-br ${config.color} p-6 transition-all duration-300 ${
+      className={`relative group rounded-2xl border ${config.borderColor} ${config.bgColor} p-6 transition-all duration-300 ${
         isHovered && !disabled ? `scale-105 ${config.glowColor} shadow-2xl` : ""
       } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
     >
       {/* Animated glow effect */}
-      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${config.color} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300`} />
+      <div className={`absolute inset-0 rounded-2xl ${config.bgColor} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300`} />
       
       <div className="relative z-10 flex flex-col items-center gap-4">
         {/* Chest emoji with animation */}

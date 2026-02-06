@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@pushchain/ui-kit": "latest",
     "@tanstack/react-query": "^5.90.12",
     "clsx": "^2.1.1",
     "ethers": "^6.14.4",

@@ -4,7 +4,6 @@ import { useState, type ReactNode } from "react";
 import { ToastProvider } from "./contexts/ToastContext";
 import { ToastContainer } from "./components/Toast";
 import { useToastContext } from "./contexts/ToastContext";
-import { PushChainProviders } from "./PushChainProviders";
 
 function ToastContainerWrapper() {
   const { toasts, removeToast } = useToastContext();
@@ -16,12 +15,10 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PushChainProviders>
-        <ToastProvider>
-          {children}
-          <ToastContainerWrapper />
-        </ToastProvider>
-      </PushChainProviders>
+      <ToastProvider>
+        {children}
+        <ToastContainerWrapper />
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

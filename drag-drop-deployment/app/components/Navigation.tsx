@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gamepad2, Activity } from "lucide-react";
+import { Gamepad2 } from "lucide-react";
 
 export function Navigation() {
   const pathname = usePathname();
 
   const links = [
     { href: "/game", label: "Magic Chest Game", icon: Gamepad2 },
-    { href: "/counter", label: "Universal Counter", icon: Activity },
   ];
 
   return (
