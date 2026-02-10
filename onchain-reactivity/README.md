@@ -1,24 +1,43 @@
-# MyEventHandler - Somnia Reactivity Testing
+# 🚀 Somnia On-Chain Reactivity Demo
 
-A simple event handler contract that demonstrates on-chain reactivity using Somnia Network's reactivity system.
+A **complete, working example** that demonstrates Somnia's on-chain reactivity feature. This shows how a Solidity contract can automatically react to events emitted by other contracts, all **on-chain** without any off-chain watchers.
 
-## 📋 Quick Start
+## 🎯 Quick Start - Complete Demo
 
-See **[STEPS.md](./STEPS.md)** for detailed step-by-step instructions.
+**The easiest way to see reactivity in action:**
 
-### Quick Commands
+```bash
+npm run demo
+```
+
+This single command will deploy contracts, create a subscription, trigger events, and verify reactivity - all automatically!
+
+## 📋 Documentation
+
+- **[COMMANDS.md](./COMMANDS.md)** - 📝 Complete command-line reference (start here!)
+- **[QUICK_START.md](./QUICK_START.md)** - ⚡ Quick command reference
+- **[COMMANDS_REFERENCE.txt](./COMMANDS_REFERENCE.txt)** - 📋 One-page command cheat sheet
+- **[REACTIVITY_DEMO.md](./REACTIVITY_DEMO.md)** - Complete step-by-step guide with explanations
+- **[STEPS.md](./STEPS.md)** - Detailed manual instructions
+
+## 🛠️ Manual Commands
+
+If you prefer to run each step manually:
 
 ```bash
 # 1. Deploy handler contract
 npm run deploy
 
-# 2. Create test subscription
+# 2. Deploy emitter contract
+npm run deploy-emitter
+
+# 3. Create test subscription
 npm run create-test-subscription
 
-# 3. Test reactivity
+# 4. Test reactivity
 npm run test-handler
 
-# 4. Manage subscription
+# 5. Manage subscription
 npm run manage-subscription check <id>
 npm run manage-subscription cancel <id>
 ```
@@ -28,15 +47,18 @@ npm run manage-subscription cancel <id>
 ```
 onchain-reactivity/
 ├── contracts/
-│   ├── MyEventHandler.sol      # Main handler contract
-│   └── TestEmitter.sol         # Test contract that emits events
+│   ├── MyEventHandler.sol          # Handler contract that reacts to events
+│   └── TestEmitter.sol             # Emitter contract for testing
 ├── scripts/
-│   ├── deploy.ts               # Deploy handler contract
-│   ├── create-subscription.ts # Create general subscription
+│   ├── deploy.ts                   # Deploy handler contract
+│   ├── deploy-emitter.ts           # Deploy emitter contract
+│   ├── demo-reactivity.ts          # 🎯 Complete end-to-end demo
+│   ├── create-subscription.ts      # Create general subscription
 │   ├── create-test-subscription.ts # Create test subscription
-│   ├── test-handler.ts         # Test reactivity
-│   └── manage-subscription.ts  # Manage subscriptions
-└── STEPS.md                    # Detailed step-by-step guide
+│   ├── test-handler.ts             # Test reactivity manually
+│   └── manage-subscription.ts      # Manage subscriptions
+├── REACTIVITY_DEMO.md              # Complete guide with explanations
+└── STEPS.md                        # Detailed step-by-step guide
 ```
 
 ## 🔧 Setup
@@ -55,11 +77,16 @@ onchain-reactivity/
 
 3. **Ensure you have 32+ STT** (Somnia Testnet Tokens)
 
-## 📖 What This Does
+## 🧠 What Is On-Chain Reactivity?
+
+On-chain reactivity on Somnia lets a Solidity contract **subscribe to events emitted by other contracts**. When those events occur, **chain validators automatically call your handler contract**, feeding it the event data so your contract can run logic *instantly on chain* — without off-chain watchers.
+
+## 📖 What This Demo Shows
 
 - **MyEventHandler**: A contract that reacts to events by updating storage and emitting `ReactedToEvent`
-- **TestEmitter**: A simple contract that emits `TestEvent` for testing
-- **Test Script**: Verifies that reactivity works by checking storage updates
+- **TestEmitter**: A contract that emits various test events
+- **Complete Demo**: End-to-end demonstration of reactivity from deployment to execution
+- **Automatic Execution**: Validators automatically call your handler when events occur
 
 ## 🔗 Resources
 

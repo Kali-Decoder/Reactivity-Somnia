@@ -1,5 +1,5 @@
 import hre from "hardhat";
-import { createPublicClient, http, parseAbiItem } from "viem";
+import { createPublicClient, http, parseAbiItem, keccak256, toBytes, formatEther } from "viem";
 import { somniaTestnet } from "viem/chains";
 import * as dotenv from "dotenv";
 
@@ -57,18 +57,64 @@ async function main() {
   console.log("Network: somniaTestnet");
   
   // Calculate expected event signature for reference
-  const TEST_EVENT_SIG = hre.ethers.id("TestEvent(bytes32)");
+  const TEST_EVENT_SIG = keccak256(toBytes("TestEvent(bytes32)"));
   console.log("Expected TestEvent Signature:", TEST_EVENT_SIG);
   
+  // Connect to Somnia Testnet
   // @ts-expect-error - Hardhat ethers helpers are available at runtime
   const [signer] = await hre.ethers.getSigners();
   // @ts-expect-error - Hardhat ethers helpers are available at runtime
-  const provider = hre.ethers.provider;
+  let provider = hre.ethers.provider;
+  
+  // Check and connect to the right network
+  const network = await provider.getNetwork();
+  console.log(`🌐 Network: ${network.name} (chainId: ${network.chainId})`);
+  
+  if (Number(network.chainId) !== 50312) {
+    console.warn("⚠️  WARNING: Not connected to Somnia Testnet!");
+    console.warn("   Expected chainId: 50312, got:", network.chainId);
+    console.warn("   The script should be run with Hardhat to use the correct network.");
+    console.warn("   Or ensure your .env has SOMNIA_TESTNET_RPC_URL set correctly.");
+    console.warn("\n💡 Try running: npx hardhat run scripts/test-handler.ts --network somniaTestnet");
+    console.warn("   Or use: npm run demo (which handles everything automatically)");
+  }
+  
   console.log("👤 Account:", signer.address);
   
   const balance = await provider.getBalance(signer.address);
+  // @ts-expect-error - Hardhat ethers helpers are available at runtime
   console.log("💰 Balance:", hre.ethers.formatEther(balance), "STT");
 
+  // Verify handler contract exists
+  console.log("\n🔍 Verifying handler contract...");
+  const handlerCode = await provider.getCode(handlerAddress);
+  if (handlerCode === "0x" || handlerCode === "0x0") {
+    console.error(`❌ ERROR: No contract found at address ${handlerAddress}`);
+    console.error("   This address does not contain a deployed contract.");
+    console.error("\n💡 Solutions:");
+    console.error("   1. Deploy the handler contract to Somnia Testnet:");
+    console.error("      npm run deploy");
+    console.error("      (This uses: npx hardhat run scripts/deploy.ts --network somniaTestnet)");
+    console.error("   2. Update HANDLER_ADDRESS in .env with the deployed address");
+    console.error("   3. Or use the complete demo which deploys everything automatically:");
+    console.error("      npm run demo");
+    console.error("\n🔍 Network Info:");
+    const currentNetwork = await provider.getNetwork();
+    console.error(`   Current: ${currentNetwork.name} (chainId: ${currentNetwork.chainId})`);
+    console.error(`   Expected: somniaTestnet (chainId: 50312)`);
+    if (Number(currentNetwork.chainId) !== 50312) {
+      console.error("\n⚠️  CRITICAL: Network mismatch!");
+      console.error("   You're not connected to Somnia Testnet.");
+      console.error("   When running with ts-node, Hardhat defaults to localhost.");
+      console.error("   Use: npx hardhat run scripts/test-handler.ts --network somniaTestnet");
+      console.error("   Or update package.json to add a script that uses --network flag");
+    }
+    console.error(`\n🔗 Check address on explorer: https://shannon-explorer.somnia.network/address/${handlerAddress}`);
+    process.exit(1);
+  }
+  console.log("✅ Handler contract verified (has code)");
+
+  // @ts-expect-error - Hardhat ethers helpers are available at runtime
   const handler = new hre.ethers.Contract(
     handlerAddress,
     HANDLER_ABI,
@@ -83,6 +129,7 @@ async function main() {
     emitterAddress = process.env.TEST_EMITTER_ADDRESS;
     console.log("\n📦 Using existing TestEmitter contract...");
     console.log("TestEmitter Address:", emitterAddress);
+    // @ts-expect-error - Hardhat ethers helpers are available at runtime
     testEmitter = new hre.ethers.Contract(
       emitterAddress,
       TEST_EMITTER_ABI,
@@ -90,6 +137,7 @@ async function main() {
     );
   } else {
     console.log("\n📦 Deploying TestEmitter contract...");
+    // @ts-expect-error - Hardhat ethers helpers are available at runtime
     const TestEmitterFactory = await hre.ethers.getContractFactory("TestEmitter");
     testEmitter = await TestEmitterFactory.deploy();
     await testEmitter.waitForDeployment();
@@ -100,15 +148,30 @@ async function main() {
   }
 
   // Get initial state
-  const reactionCountBefore = await handler.reactionCount();
-  const reactionsByEmitterBefore = await handler.reactionsByEmitter(emitterAddress);
+  console.log("\n🔍 Reading handler contract state...");
+  let reactionCountBefore;
+  let reactionsByEmitterBefore;
+  
+  try {
+    reactionCountBefore = await handler.reactionCount();
+    reactionsByEmitterBefore = await handler.reactionsByEmitter(emitterAddress);
+  } catch (error: any) {
+    console.error("\n❌ ERROR: Failed to read contract state");
+    console.error("   Error:", error.message);
+    console.error("\n💡 Possible issues:");
+    console.error("   1. Contract ABI mismatch - contract may not be MyEventHandler");
+    console.error("   2. Network mismatch - contract may be on different network");
+    console.error("   3. RPC connection issue");
+    console.error(`\n   Check contract on explorer: https://shannon-explorer.somnia.network/address/${handlerAddress}`);
+    process.exit(1);
+  }
   
   console.log("\n🔍 BEFORE Reactivity");
   console.log("Reaction Count:", reactionCountBefore.toString());
   console.log("Reactions by Emitter:", reactionsByEmitterBefore.toString());
 
   // Emit a test event
-  const testTopic = hre.ethers.id("TestEvent(bytes32)");
+  const testTopic = keccak256(toBytes("TestEvent(bytes32)"));
   console.log("\n📤 Emitting TestEvent...");
   console.log("Event Topic:", testTopic);
   

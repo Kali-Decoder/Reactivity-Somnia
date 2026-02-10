@@ -1,0 +1,72 @@
+================================================================================
+SOMNIA REACTIVITY - COMMAND LINE REFERENCE
+================================================================================
+
+QUICK START (One Command):
+--------------------------
+npm run demo
+
+
+SETUP:
+------
+npm install
+echo "PRIVATE_KEY=0x..." > .env
+echo "SOMNIA_TESTNET_RPC_URL=https://dream-rpc.somnia.network/" >> .env
+
+
+DEPLOYMENT:
+-----------
+npm run deploy                    # Deploy handler contract
+npm run deploy-emitter            # Deploy emitter contract
+
+
+SUBSCRIPTIONS:
+--------------
+npm run create-test-subscription  # Create subscription for TestEvent
+npm run create-subscription       # Create general subscription
+npm run manage-subscription check <id>  # Check subscription status
+npm run manage-subscription cancel <id>  # Cancel subscription
+
+
+TESTING:
+--------
+npm run demo                      # Complete end-to-end demo
+npm run test-handler              # Test reactivity manually
+
+
+VERIFICATION:
+-------------
+# Check contract on explorer (replace YOUR_ADDRESS)
+open https://shannon-explorer.somnia.network/address/YOUR_ADDRESS
+
+# Check transaction (replace YOUR_TX_HASH)
+open https://shannon-explorer.somnia.network/tx/YOUR_TX_HASH
+
+
+TROUBLESHOOTING:
+----------------
+# Check if .env has required variables
+cat .env | grep PRIVATE_KEY
+cat .env | grep HANDLER_ADDRESS
+
+# Get testnet tokens
+# Visit: https://faucet.somnia.network/
+
+
+COMPLETE WORKFLOW:
+------------------
+npm install
+echo "PRIVATE_KEY=0x..." > .env
+echo "SOMNIA_TESTNET_RPC_URL=https://dream-rpc.somnia.network/" >> .env
+npm run deploy
+npm run deploy-emitter
+npm run create-test-subscription
+npm run test-handler
+
+
+================================================================================
+For detailed documentation, see:
+- COMMANDS.md (complete command reference)
+- REACTIVITY_DEMO.md (full guide with explanations)
+- QUICK_START.md (quick reference)
+================================================================================
