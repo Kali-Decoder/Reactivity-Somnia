@@ -6,7 +6,8 @@ import {
   createWalletClient,
   http,
   keccak256,
-  toBytes
+  toBytes,
+  parseGwei
 } from 'viem';
 import * as dotenv from "dotenv";
 
@@ -62,7 +63,7 @@ async function main() {
   // ---------------------------
   // Your deployed contract
   // ---------------------------
-  const CONTRACT = '0xa4D7312A3e178C34079678f47070a6f5027A2Fdf';
+  const CONTRACT = '0x0581eaf82D75b886C25503E7c0b8164054907B24';
 
   console.log('🎮 MagicChestReactiveGame:', CONTRACT);
 
@@ -76,28 +77,18 @@ async function main() {
   console.log('🔔 Event Signature:', CHEST_SIG);
 
   // ---------------------------
-  // Gas config
-  // ---------------------------
-  const gasPrice = await publicClient.getGasPrice();
-
-  console.log('⛽ Gas Price:', gasPrice.toString());
-
-  // ---------------------------
-  // Subscription data (CORRECT)
+  // Subscription data
   // ---------------------------
   const subData = {
     handlerContractAddress: CONTRACT as `0x${string}`,
-    emitter: CONTRACT as `0x${string}`,
-
-    // ✅ ONLY filter by event signature
-    eventTopics: [CHEST_SIG],
-
-    gasLimit: 500_000n,
-    priorityFeePerGas: gasPrice / 10n,
-    maxFeePerGas: gasPrice * 2n,
-
-    isGuaranteed: true,
-    isCoalesced: false
+    priorityFeePerGas: parseGwei('2'),
+    maxFeePerGas: parseGwei('10'),
+    gasLimit: 500_000n, // Adjust based on handler complexity
+    isGuaranteed: true, // Retry on failure
+    isCoalesced: false, // One call per event
+    // Event filters
+    eventTopics: [CHEST_SIG], // Filter by ChestOpened event signature
+    emitter: CONTRACT as `0x${string}`, // Filter by contract address
   };
 
   console.log('\n🚀 Creating subscription...');
