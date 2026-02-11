@@ -63,7 +63,7 @@ async function main() {
   // ---------------------------
   // Your deployed contract
   // ---------------------------
-  const CONTRACT = '0x0581eaf82D75b886C25503E7c0b8164054907B24';
+  const CONTRACT = '0x5053B01B20DAc571fF7d011f41c27E068A5c5D8e';
 
   console.log('🎮 MagicChestReactiveGame:', CONTRACT);
 
@@ -83,7 +83,7 @@ async function main() {
     handlerContractAddress: CONTRACT as `0x${string}`,
     priorityFeePerGas: parseGwei('2'),
     maxFeePerGas: parseGwei('10'),
-    gasLimit: 500_000n, // Adjust based on handler complexity
+    gasLimit: 3_000_000n, // Increased for reactivity execution
     isGuaranteed: true, // Retry on failure
     isCoalesced: false, // One call per event
     // Event filters

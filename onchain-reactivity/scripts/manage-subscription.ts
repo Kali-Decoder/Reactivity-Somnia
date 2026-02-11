@@ -12,7 +12,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const GAME_CONTRACT =
-  '0x228994976d76580481Fae2ad06024C5fc7E18933';
+  '0x5053B01B20DAc571fF7d011f41c27E068A5c5D8e';
 
 const ChestOpenedABI = parseAbiItem(
   'event ChestOpened(address indexed player, uint256 chestType)'

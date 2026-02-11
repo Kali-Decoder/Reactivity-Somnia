@@ -46,18 +46,23 @@ export function EventsHistory({ contractAddress, account, abi }: EventsHistoryPr
 
       // Get current block number
       const currentBlock = await provider.getBlockNumber();
-      // Fetch events from last 1000 blocks (adjust as needed)
-      const blockRange = BigInt(1000);
       const currentBlockBigInt = typeof currentBlock === 'bigint' ? currentBlock : BigInt(currentBlock);
-      const fromBlock = currentBlockBigInt > blockRange ? currentBlockBigInt - blockRange : BigInt(0);
+      
+      // Fetch events from last 1000 blocks (RPC limit is 1000 blocks)
+      // Always use explicit toBlock to avoid "block range exceeds 1000" error
+      const maxBlockRange = BigInt(1000);
+      const fromBlock = currentBlockBigInt >= maxBlockRange 
+        ? currentBlockBigInt - maxBlockRange + BigInt(1) // Ensure range is exactly 1000 blocks
+        : BigInt(0);
+      const toBlock = currentBlockBigInt; // Explicitly set toBlock to current block
 
-      // Fetch ChestOpened events
+      // Fetch ChestOpened events with explicit block range
       const chestOpenedFilter = contract.filters.ChestOpened();
-      const chestOpenedEvents = await contract.queryFilter(chestOpenedFilter, fromBlock);
+      const chestOpenedEvents = await contract.queryFilter(chestOpenedFilter, fromBlock, toBlock);
 
-      // Fetch Reacted events
+      // Fetch Reacted events with explicit block range
       const reactedFilter = contract.filters.Reacted();
-      const reactedEvents = await contract.queryFilter(reactedFilter, fromBlock);
+      const reactedEvents = await contract.queryFilter(reactedFilter, fromBlock, toBlock);
 
       // Combine and format events
       const allEvents: GameEvent[] = [];
@@ -106,7 +111,69 @@ export function EventsHistory({ contractAddress, account, abi }: EventsHistoryPr
       setEvents(allEvents);
     } catch (err: any) {
       console.error("Error fetching events:", err);
-      setError(err.message || "Failed to fetch events");
+      
+      // Handle specific RPC errors
+      if (err.message?.includes("block range exceeds") || err.code === -32603) {
+        setError("Block range too large. Try refreshing to get recent events only.");
+        // Fallback: try fetching from a smaller range
+        try {
+          const provider = new ethers.BrowserProvider((window as any).ethereum);
+          const contract = new ethers.Contract(contractAddress, abi, provider);
+          const currentBlock = await provider.getBlockNumber();
+          const currentBlockBigInt = typeof currentBlock === 'bigint' ? currentBlock : BigInt(currentBlock);
+          const fromBlock = currentBlockBigInt > BigInt(500) ? currentBlockBigInt - BigInt(500) : BigInt(0);
+          const toBlock = currentBlockBigInt;
+          
+          const chestOpenedFilter = contract.filters.ChestOpened();
+          const chestOpenedEvents = await contract.queryFilter(chestOpenedFilter, fromBlock, toBlock);
+          const reactedFilter = contract.filters.Reacted();
+          const reactedEvents = await contract.queryFilter(reactedFilter, fromBlock, toBlock);
+          
+          // Process events (same as above)
+          const allEvents: GameEvent[] = [];
+          for (const event of chestOpenedEvents) {
+            if ('args' in event && event.args) {
+              const block = await provider.getBlock(event.blockNumber);
+              const player = event.args.player || event.args[0];
+              const chestType = event.args.chestType || event.args[1];
+              const chestTypeNum = Number(chestType);
+              allEvents.push({
+                type: "ChestOpened",
+                player: typeof player === 'string' ? player : String(player),
+                chestType: chestTypeNum,
+                chestTypeName: CHEST_TYPE_NAMES[chestTypeNum] || "Unknown",
+                blockNumber: Number(event.blockNumber),
+                transactionHash: event.transactionHash,
+                timestamp: block?.timestamp ? Number(block.timestamp) * 1000 : Date.now(),
+              });
+            }
+          }
+          for (const event of reactedEvents) {
+            if ('args' in event && event.args) {
+              const block = await provider.getBlock(event.blockNumber);
+              const player = event.args.player || event.args[0];
+              const chestType = event.args.chestType || event.args[1];
+              const chestTypeNum = Number(chestType);
+              allEvents.push({
+                type: "Reacted",
+                player: typeof player === 'string' ? player : String(player),
+                chestType: chestTypeNum,
+                chestTypeName: CHEST_TYPE_NAMES[chestTypeNum] || "Unknown",
+                blockNumber: Number(event.blockNumber),
+                transactionHash: event.transactionHash,
+                timestamp: block?.timestamp ? Number(block.timestamp) * 1000 : Date.now(),
+              });
+            }
+          }
+          allEvents.sort((a, b) => b.timestamp - a.timestamp);
+          setEvents(allEvents);
+          setError(null); // Clear error if fallback succeeds
+        } catch (fallbackErr: any) {
+          setError("Failed to fetch events. Please try again later.");
+        }
+      } else {
+        setError(err.message || "Failed to fetch events");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -24,7 +24,7 @@ async function waitForNextBlock(provider: any, lastBlock: number) {
 }
 
 async function main() {
-  const contractAddress = "0x0581eaf82D75b886C25503E7c0b8164054907B24";
+  const contractAddress = "0x5053B01B20DAc571fF7d011f41c27E068A5c5D8e";
 
   console.log("🎮 Testing MagicChestReactiveGame");
   console.log("=".repeat(50));
