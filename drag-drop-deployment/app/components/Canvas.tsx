@@ -244,7 +244,7 @@ export function Canvas({ onAddTemplate }: CanvasProps) {
   };
 
   const hasConnection = connections.length > 0;
-  const canDeploy = hasConnection && isConnected;
+  const canDeploy = hasConnection;
 
   if (!mounted) {
     return (
@@ -665,34 +665,6 @@ export function Canvas({ onAddTemplate }: CanvasProps) {
         </div>
       </div>
 
-      {/* Deploy Button */}
-      {hasConnection && (
-        <div className="absolute bottom-6 right-6 flex flex-col gap-3 items-end">
-          {!isConnected ? (
-            <div className="px-6 py-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 backdrop-blur-sm">
-              Please connect wallet to deploy
-            </div>
-          ) : (
-            <button
-              onClick={handleDeploy}
-              disabled={!canDeploy || isDeploying}
-              className="flex items-center gap-2 px-8 py-4 rounded-xl bg-monad-purple text-white font-semibold text-lg transition-all hover:shadow-[0_0_30px_-5px_rgba(135,109,255,0.5)] hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            >
-              {isDeploying ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Deploying...
-                </>
-              ) : (
-                <>
-                  <Rocket className="h-5 w-5" />
-                  Deploy Contract
-                </>
-              )}
-            </button>
-          )}
-        </div>
-      )}
 
       {/* Error Display */}
       {error && (

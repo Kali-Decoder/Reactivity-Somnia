@@ -7,7 +7,6 @@ import { ChestCard } from "../components/ChestCard";
 import { PlayerStats } from "../components/PlayerStats";
 import { ReactivityIndicator } from "../components/ReactivityIndicator";
 import { EventsHistory } from "../components/EventsHistory";
-import { WalletConnect } from "../components/WalletConnect";
 import { somniaTestnet } from "../config/chains";
 
 // Contract ABI
