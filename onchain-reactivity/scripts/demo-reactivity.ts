@@ -127,7 +127,7 @@ async function main() {
     eventTopics: [TEST_EVENT_SIG],
     priorityFeePerGas: parseGwei('2'),
     maxFeePerGas: parseGwei('10'),
-    gasLimit: 500_000n,
+    gasLimit: 3_000_000n, // Increased for reactivity execution
     isGuaranteed: true,
     isCoalesced: false,
   };

@@ -53,7 +53,7 @@ async function main() {
     handlerContractAddress: process.env.HANDLER_ADDRESS as `0x${string}`,
     priorityFeePerGas: parseGwei('2'),
     maxFeePerGas: parseGwei('10'),
-    gasLimit: 500_000n, // Adjust based on handler complexity
+    gasLimit: 3_000_000n, // Increased for reactivity execution
     isGuaranteed: true, // Retry on failure
     isCoalesced: false, // One call per event
     // Optional filters: eventTopics: ['0x...'], emitter: '0xTargetContract'
