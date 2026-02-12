@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { Gamepad2, RefreshCw, ExternalLink, AlertTriangle, Network } from "lucide-react";
+import { Gamepad2, RefreshCw, ExternalLink, AlertTriangle, Network, BookOpen } from "lucide-react";
+import Link from "next/link";
 import { ChestCard } from "../components/ChestCard";
 import { PlayerStats } from "../components/PlayerStats";
 import { ReactivityIndicator } from "../components/ReactivityIndicator";
@@ -453,31 +454,42 @@ export default function GamePage() {
               </h1>
             </div>
             
-            {/* Wallet Connection */}
-            {!isConnected ? (
-              <button
-                onClick={connectWallet}
-                className="px-6 py-3 bg-monad-purple hover:bg-monad-purple/90 text-white rounded-lg font-medium transition-all hover:shadow-lg hover:shadow-monad-purple/20"
+            {/* Wallet Connection & Docs */}
+            <div className="flex items-center gap-3">
+              <Link
+                href="/docs"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg transition-colors"
+                title="Learn How It Works"
               >
-                Connect Wallet
-              </button>
-            ) : (
-              <div className="flex items-center gap-3">
-                <div className="bg-card border border-card-border rounded-lg px-4 py-2">
-                  <p className="text-xs text-gray-400">Connected</p>
-                  <p className="text-sm font-mono text-monad-purple">
-                    {account.slice(0, 6)}...{account.slice(-4)}
-                  </p>
-                </div>
+                <BookOpen className="w-4 h-4" />
+                <span className="hidden sm:inline">Docs</span>
+              </Link>
+              
+              {!isConnected ? (
                 <button
-                  onClick={fetchPlayerStats}
-                  className="p-3 bg-monad-purple/10 hover:bg-monad-purple/20 text-monad-purple rounded-lg transition-colors"
-                  title="Refresh Stats"
+                  onClick={connectWallet}
+                  className="px-6 py-3 bg-monad-purple hover:bg-monad-purple/90 text-white rounded-lg font-medium transition-all hover:shadow-lg hover:shadow-monad-purple/20"
                 >
-                  <RefreshCw className="w-5 h-5" />
+                  Connect Wallet
                 </button>
-              </div>
-            )}
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="bg-card border border-card-border rounded-lg px-4 py-2">
+                    <p className="text-xs text-gray-400">Connected</p>
+                    <p className="text-sm font-mono text-monad-purple">
+                      {account.slice(0, 6)}...{account.slice(-4)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={fetchPlayerStats}
+                    className="p-3 bg-monad-purple/10 hover:bg-monad-purple/20 text-monad-purple rounded-lg transition-colors"
+                    title="Refresh Stats"
+                  >
+                    <RefreshCw className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           <p className="text-gray-400 text-sm sm:text-base max-w-3xl">
             Open chests to earn rewards through Somnia's on-chain reactivity! Common chests give +10 coins, 
@@ -595,9 +607,19 @@ export default function GamePage() {
 
         {/* How It Works Section */}
         <div className="mt-12 bg-card border border-card-border rounded-xl p-6 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-monad-purple to-purple-400 bg-clip-text text-transparent">
-            How It Works
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-monad-purple to-purple-400 bg-clip-text text-transparent">
+              How It Works
+            </h2>
+            <Link
+              href="/docs"
+              className="flex items-center gap-2 px-4 py-2 bg-monad-purple/10 hover:bg-monad-purple/20 text-monad-purple rounded-lg transition-colors text-sm"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Learn More</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
             <div>
               <div className="text-3xl mb-2">1️⃣</div>
@@ -620,6 +642,16 @@ export default function GamePage() {
                 Your coins or legendary sword are updated automatically without any additional transaction!
               </p>
             </div>
+          </div>
+          
+          <div className="mt-6 pt-6 border-t border-card-border">
+            <p className="text-sm text-gray-400 text-center">
+              Want a detailed technical explanation? Visit our{" "}
+              <Link href="/docs" className="text-monad-purple hover:underline">
+                interactive documentation page
+              </Link>{" "}
+              to understand exactly what happens when you open a chest!
+            </p>
           </div>
         </div>
 
