@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { Gamepad2, RefreshCw, ExternalLink, AlertTriangle, Network, BookOpen } from "lucide-react";
+import { RefreshCw, ExternalLink, AlertTriangle, Network, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { ChestCard } from "./components/ChestCard";
 import { PlayerStats } from "./components/PlayerStats";
