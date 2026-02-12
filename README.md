@@ -78,7 +78,7 @@ npm install
 npm run dev
 
 # Then visit:
-# - http://localhost:3000/game - Play the game
+# - http://localhost:3000 - Play the game
 # - http://localhost:3000/docs - Interactive documentation
 ```
 

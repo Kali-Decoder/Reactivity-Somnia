@@ -15,7 +15,8 @@ import {
   Home,
   FileCode,
   Layers,
-  Activity
+  Activity,
+  Gamepad2
 } from "lucide-react";
 
 export default function DocsPage() {
@@ -32,23 +33,31 @@ export default function DocsPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-monad-purple/5 blur-[120px] rounded-full pointer-events-none" />
       </div>
 
-      {/* Navigation */}
-      <nav className="border-b border-card-border backdrop-blur-sm sticky top-0 z-50 bg-black/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <BookOpen className="w-8 h-8 text-monad-purple" />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-monad-purple to-purple-400 bg-clip-text text-transparent">
-                Documentation
-              </h1>
+      {/* Navigation Bar */}
+      <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-2">
+              <Gamepad2 className="w-6 h-6 text-monad-purple" />
+              <span className="text-lg font-bold bg-gradient-to-r from-monad-purple to-purple-400 bg-clip-text text-transparent">
+                Magic Chest Game
+              </span>
             </div>
-            <Link
-              href="/game"
-              className="flex items-center gap-2 px-4 py-2 bg-monad-purple/10 hover:bg-monad-purple/20 text-monad-purple rounded-lg transition-colors"
-            >
-              <Home className="w-4 h-4" />
-              <span>Back to Game</span>
-            </Link>
+            
+            <div className="flex items-center gap-2">
+              <Link
+                href="/"
+                className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-t-lg transition-colors"
+              >
+                Game
+              </Link>
+              <Link
+                href="/docs"
+                className="px-4 py-2 text-sm font-medium text-white bg-monad-purple/20 border-b-2 border-monad-purple rounded-t-lg"
+              >
+                Documentation
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
@@ -614,7 +623,7 @@ function _onEvent(
                 Experience on-chain reactivity firsthand by opening chests and watching your rewards appear automatically!
               </p>
               <Link
-                href="/game"
+                href="/"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-monad-purple hover:bg-monad-purple/90 text-white rounded-lg font-medium transition-all hover:shadow-lg hover:shadow-monad-purple/20"
               >
                 <span>Open Some Chests</span>
