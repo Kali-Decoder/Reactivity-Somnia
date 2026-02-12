@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   
+  // Add empty turbopack config to acknowledge we're using webpack
+  turbopack: {},
+  
   // Use webpack instead of Turbopack for builds to avoid issues with thread-stream test files
   webpack: (config, { isServer }) => {
     // Ignore test files and other non-production files from thread-stream
