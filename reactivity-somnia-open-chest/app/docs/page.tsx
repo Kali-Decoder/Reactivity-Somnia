@@ -9,14 +9,10 @@ import {
   GitBranch, 
   Clock, 
   ArrowRight,
-  ChevronDown,
-  ChevronUp,
   ExternalLink,
-  Home,
   FileCode,
   Layers,
-  Activity,
-  Gamepad2
+  Activity
 } from "lucide-react";
 
 export default function DocsPage() {
@@ -28,40 +24,6 @@ export default function DocsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Ambient Background */}
-      <div className="fixed inset-0 -z-10 h-full w-full bg-black">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-monad-purple/5 blur-[120px] rounded-full pointer-events-none" />
-      </div>
-
-      {/* Navigation Bar */}
-      <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <Gamepad2 className="w-6 h-6 text-monad-purple" />
-              <span className="text-lg font-bold bg-gradient-to-r from-monad-purple to-purple-400 bg-clip-text text-transparent">
-                Magic Chest Game
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Link
-                href="/"
-                className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-t-lg transition-colors"
-              >
-                Game
-              </Link>
-              <Link
-                href="/docs"
-                className="px-4 py-2 text-sm font-medium text-white bg-monad-purple/20 border-b-2 border-monad-purple rounded-t-lg"
-              >
-                Documentation
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">

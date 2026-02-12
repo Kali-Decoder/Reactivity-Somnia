@@ -2,36 +2,45 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gamepad2 } from "lucide-react";
+import { Gamepad2, BookOpen } from "lucide-react";
 
 export function Navigation() {
   const pathname = usePathname();
 
   const links = [
-    { href: "/game", label: "Magic Chest Game", icon: Gamepad2 },
+    { href: "/", label: "Game", icon: Gamepad2 },
+    { href: "/docs", label: "Documentation", icon: BookOpen },
   ];
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
-      <div className="bg-card/80 backdrop-blur-xl border border-card-border rounded-2xl p-2 shadow-2xl">
-        <div className="flex gap-2">
-          {links.map(({ href, label, icon: Icon }) => {
-            const isActive = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all ${
-                  isActive
-                    ? "bg-monad-purple text-white shadow-lg shadow-monad-purple/20"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{label}</span>
-              </Link>
-            );
-          })}
+    <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center gap-2">
+            <Gamepad2 className="w-6 h-6 text-monad-purple" />
+            <span className="text-lg font-bold bg-gradient-to-r from-monad-purple to-purple-400 bg-clip-text text-transparent">
+              Magic Chest Game
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {links.map(({ href, label, icon: Icon }) => {
+              const isActive = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                    isActive
+                      ? "text-white bg-monad-purple/20 border-b-2 border-monad-purple"
+                      : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+                  }`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
     </nav>
