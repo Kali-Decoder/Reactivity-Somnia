@@ -5,10 +5,10 @@ const nextConfig: NextConfig = {
   // Output configuration for Vercel
   output: 'standalone',
   
-  // Disable eslint during builds
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // // Disable eslint during builds
+  // eslint: {
+  //   ignoreDuringBuilds: true,
+  // },
   
   // Disable TypeScript errors during builds (optional - remove if you want strict checking)
   typescript: {

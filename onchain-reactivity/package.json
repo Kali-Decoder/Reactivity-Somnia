@@ -4,7 +4,12 @@
     "deploy": "hardhat run scripts/deploy.ts --network somniaTestnet",
     "create-subscription": "npx ts-node scripts/create-subscription.ts",
     "manage-subscription": "npx ts-node scripts/manage-subscription.ts",
-    "test-chest": "CHEST_TYPE=${CHEST_TYPE:-COMMON} hardhat run scripts/test-chest.ts --network somniaTestnet"
+    "test-chest": "CHEST_TYPE=${CHEST_TYPE:-COMMON} hardhat run scripts/test-chest.ts --network somniaTestnet",
+    "deploy-last-player": "hardhat run scripts/deploy-last-player.ts --network somniaTestnet",
+    "create-last-player-subscription": "npx ts-node scripts/create-last-player-subscription.ts",
+    "test-last-player": "hardhat run scripts/test-last-player.ts --network somniaTestnet",
+    "check-last-player": "hardhat run scripts/check-last-player-status.ts --network somniaTestnet",
+    "manage-last-player": "hardhat run scripts/manage-last-player.ts --network somniaTestnet"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",

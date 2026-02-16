@@ -754,10 +754,6 @@ function _onEvent(...) internal override {
 - **Testnet Explorer:** https://shannon-explorer.somnia.network
 - **Testnet Faucet:** https://faucet.somnia.network
 
-- **Mainnet RPC:** `https://api.infra.mainnet.somnia.network/`
-- **Mainnet Chain ID:** `5031`
-- **Mainnet Explorer:** https://explorer.somnia.network
-
 ### Package Versions
 ```json
 {
@@ -860,9 +856,270 @@ SOMNIA_TESTNET_RPC_URL=https://dream-rpc.somnia.network/
 
 ---
 
+## 🎮 Example 2: Last Player Game
+
+A "last player standing" game where players enter by paying 1 ETH, and whoever is the last player after 60 seconds wins the entire pot. **Reactivity automatically pays out the winner!**
+
+### Contracts
+
+#### `LastPlayerGame.sol`
+The main game contract:
+- Players call `enterGame()` with 1 ETH
+- Each entry resets the 60-second timer
+- After 60 seconds of no new entries, `payoutWinner()` can be called
+- Winner receives the entire pot
+- Game can be reset with `startNewRound()`
+
+#### `LastPlayerReactiveHandler.sol`
+The reactive handler that listens for `PlayerEntered` events and automatically attempts to pay out the winner when the timer expires.
+
+### How It Works
+
+```
+┌─────────────┐
+│   Player A  │ ──> enterGame() + 1 ETH
+└─────────────┘
+       │
+       ▼
+┌──────────────────────────────────┐
+│  LastPlayerGame (0x...)          │
+│  - lastPlayer = Player A         │  ───> PlayerEntered event
+│  - lastEntryTime = now           │
+│  - pot = 1 ETH                   │
+└──────────────────────────────────┘
+                                           │
+                                           ▼
+                                    ┌──────────────────────┐
+                                    │  Somnia Validators   │
+                                    │  (0x0100...)         │
+                                    └──────────────────────┘
+                                           │
+                                           ▼
+                                    ┌──────────────────────────────┐
+                                    │ LastPlayerReactiveHandler    │
+                                    │ - Receives PlayerEntered     │
+                                    │ - Tries payoutWinner()       │
+                                    │ - Succeeds if timer expired  │
+                                    │ - Reverts if timer active    │
+                                    └──────────────────────────────┘
+
+... 60 seconds later ...
+
+┌─────────────┐
+│   Player B  │ ──> enterGame() + 1 ETH
+└─────────────┘
+       │
+       ▼
+┌──────────────────────────────────┐
+│  LastPlayerGame                  │
+│  - Emits PlayerEntered           │  ───> Reactivity triggers!
+└──────────────────────────────────┘
+       │                                   │
+       ▼                                   ▼
+┌──────────────────────────────────┐   ┌─────────────────────────┐
+│  Player B becomes new lastPlayer │   │  Handler pays Player A  │
+│  New 60s timer starts            │   │  (previous winner)      │
+│  pot = 2 ETH                     │   │  with validator tx      │
+└──────────────────────────────────┘   └─────────────────────────┘
+```
+
+### Key Features
+
+✅ **Fully Automated Payouts** - No manual intervention needed  
+✅ **Gas Efficient** - Uses try/catch to avoid failed payout attempts  
+✅ **Trustless** - Winner is paid automatically by validators  
+✅ **Simple Logic** - Easy to understand and audit  
+
+### Quick Start
+
+```bash
+# 1. Deploy the contracts
+npm run deploy-last-player
+
+# Output example:
+# LastPlayerGame: 0x123...
+# LastPlayerReactiveHandler: 0x456...
+
+# 2. Create reactivity subscription
+GAME_ADDRESS=0x123... HANDLER_ADDRESS=0x456... npm run create-last-player-subscription
+
+# Output: Subscription ID: 42
+
+# 3. Test the game
+GAME_ADDRESS=0x123... npm run test-last-player
+
+# 4. Check game status anytime
+GAME_ADDRESS=0x123... npm run check-last-player
+```
+
+### Testing Reactivity
+
+To fully test the reactive payout:
+
+```bash
+# Terminal 1: First player enters
+GAME_ADDRESS=0x123... npm run test-last-player
+# Output: "You are now the last player. Timer: 60 seconds"
+
+# Wait 60+ seconds...
+
+# Terminal 2: Second player enters (triggers payout for first player)
+GAME_ADDRESS=0x123... npm run test-last-player
+# Output: "Reactivity detected! Previous winner was paid."
+```
+
+### Monitoring
+
+Check the current game state:
+
+```bash
+GAME_ADDRESS=0x123... npm run check-last-player
+```
+
+Output:
+```
+🔍 LastPlayerGame Status Check
+============================================================
+Contract: 0x123...
+Network: somniaTestnet
+Block: 12345
+
+📋 GAME CONFIGURATION
+============================================================
+Entry Amount: 1.0 ETH
+Round Duration: 60 seconds
+
+📊 CURRENT STATE
+============================================================
+Round Active: ✅ YES
+Contract Balance: 2.5 ETH
+Last Player: 0xabc...
+
+⏱️  TIMER STATUS
+============================================================
+Last Entry Time: 2026-02-13 10:30:00
+Expiry Time: 2026-02-13 10:31:00
+Elapsed: 45 seconds
+Remaining: 15 seconds
+
+⏳ STATUS: Timer RUNNING - Game in progress
+   Currently winning: 0xabc...
+   Time until payout: 15 seconds
+```
+
+### Understanding the Reactive Handler
+
+```solidity
+function _onEvent(
+    address emitter,
+    bytes32[] calldata topics,
+    bytes calldata
+) internal override {
+    // Only process events from our game contract
+    if (emitter != gameContract) return;
+
+    // Check if it's a PlayerEntered event
+    bytes32 playerEnteredTopic = keccak256("PlayerEntered(address,uint256)");
+    
+    if (topics[0] == playerEnteredTopic) {
+        // Try to payout the winner
+        ILastPlayerGame game = ILastPlayerGame(gameContract);
+        
+        try game.payoutWinner() {
+            // Success! Timer had expired, winner was paid
+        } catch {
+            // Timer not expired yet → silently continue
+            // This is expected and normal behavior
+        }
+    }
+}
+```
+
+**Key Design Decisions:**
+
+1. **Try/Catch Pattern**: The handler attempts payout on every `PlayerEntered` event, but fails gracefully if the timer hasn't expired. This is efficient because:
+   - No additional state reads needed
+   - No wasted gas on failed transactions (validator handles this)
+   - Simple and predictable behavior
+
+2. **Event-Driven**: Instead of polling or timers, the system reacts to new player entries, making it more gas-efficient and responsive.
+
+3. **Single Responsibility**: The handler only monitors and triggers payouts - all game logic remains in the main contract.
+
+### NPM Scripts
+
+```bash
+# Deployment
+npm run deploy-last-player
+
+# Subscription Management  
+npm run create-last-player-subscription
+
+# Testing & Monitoring
+npm run test-last-player
+npm run check-last-player
+```
+
+### Environment Variables
+
+```env
+PRIVATE_KEY=0x...
+GAME_ADDRESS=0x...           # LastPlayerGame contract address
+HANDLER_ADDRESS=0x...        # LastPlayerReactiveHandler contract address
+LAST_PLAYER_GAME_ADDRESS=0x...     # Alternative name for GAME_ADDRESS
+LAST_PLAYER_HANDLER_ADDRESS=0x...  # Alternative name for HANDLER_ADDRESS
+```
+
+### Common Scenarios
+
+#### Scenario 1: Single Player
+- Player A enters → becomes `lastPlayer`
+- Timer starts (60 seconds)
+- No one else enters
+- After 60s, anyone can manually call `payoutWinner()` or wait for next player
+
+#### Scenario 2: Multiple Players (Normal Flow)
+- Player A enters → Timer: 60s
+- Player B enters after 30s → Timer resets to 60s, Player B is now `lastPlayer`
+- Reactivity tries to payout (fails, timer not expired for Player A)
+- Player C enters after 70s total → Timer resets, Player C is `lastPlayer`
+- **Reactivity pays Player B automatically** (their timer expired!)
+
+#### Scenario 3: Rapid Entries
+- Player A enters
+- Player B enters immediately (< 1 block later)
+- Player C enters immediately
+- Reactivity attempts payout each time (all fail gracefully)
+- Eventually someone waits 60s+ → next entry triggers payout
+
+### Troubleshooting
+
+**"No reactivity detected"**
+- Check subscription exists: `npm run manage-subscription check <ID>`
+- Verify subscription has 32+ STT balance
+- Ensure correct event signature in subscription
+- Wait for another player to enter after timer expires
+
+**"Timer not expired" error**
+- This is normal! Payouts only work after 60 seconds
+- Wait for the countdown to finish
+- Check status: `npm run check-last-player`
+
+**"No players" error**
+- Call `enterGame()` with 1 ETH first
+- Check game state: `npm run check-last-player`
+
+### Gas Optimization Tips
+
+1. **Batch Testing**: Enter multiple times in quick succession to build up the pot, then wait for single reactive payout
+2. **Monitor Blocks**: Use the block explorer to watch for validator transactions (from `0x0100...`)
+3. **Subscription Balance**: Keep enough STT in subscription to cover multiple reactive calls
+
+---
+
 ## 🚀 Next Steps
 
-1. **Modify** `MagicChestReactiveGame.sol` for your use case
+1. **Modify** `MagicChestReactiveGame.sol` or `LastPlayerGame.sol` for your use case
 2. **Update** event signatures and reactive logic
 3. **Deploy** to Somnia Testnet
 4. **Create** your subscription

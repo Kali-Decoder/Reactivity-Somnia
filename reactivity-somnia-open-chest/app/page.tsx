@@ -8,6 +8,7 @@ import { ChestCard } from "./components/ChestCard";
 import { PlayerStats } from "./components/PlayerStats";
 import { ReactivityIndicator } from "./components/ReactivityIndicator";
 import { EventsHistory } from "./components/EventsHistory";
+import { GameSelector } from "./components/GameSelector";
 import { somniaTestnet } from "./config/chains";
 
 // Contract ABI
@@ -445,7 +446,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-6">
             <div>
               <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-monad-purple to-purple-400 bg-clip-text text-transparent mb-3">
-                Open Chests, Earn Rewards
+                🎁 Open Chests, Earn Rewards
               </h1>
               <p className="text-gray-400 text-sm sm:text-base max-w-2xl">
                 Experience Somnia's on-chain reactivity! Common chests give +10 coins, 
@@ -482,6 +483,9 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Game Selector */}
+        <GameSelector />
 
         {/* Network Info */}
         <div className="bg-monad-purple/10 border border-monad-purple/30 rounded-xl p-4 mb-8">
